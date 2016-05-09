@@ -22,7 +22,7 @@ int main(int argc , char *argv[])
     const char *address = argv[1];
     const uint16_t port = (uint16_t)atoi(argv[2]);
     
-    printf("\n\nConnected\n");
+    printf("Connected\n");
     
     //Create socket
     int sock = socket(AF_INET , SOCK_STREAM , 0);
@@ -58,11 +58,14 @@ int main(int argc , char *argv[])
         while (fgets(message, BUFFER_SIZE, stdin) == message) {
             if (strncmp(message, "logout", strlen(message)-1) == 0 || strncmp(message, "exit", strlen(message)-1) == 0)
                 break;
-                
+            
             // Sends data through socket
             send(sock, message, strlen(message) + 1, 0);
         }
+        printf("Closing connection... ");
+        close(sock);
         kill(pid, SIGKILL);
+        printf("Closed\n");
     } else {
         char reply[BUFFER_SIZE];
         memset(reply, 0, sizeof(reply));
@@ -73,8 +76,6 @@ int main(int argc , char *argv[])
             fflush(stdout);
         }
     }
-    
-    close(sock);
     
     return 0;
     

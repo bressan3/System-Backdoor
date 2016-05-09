@@ -48,7 +48,7 @@ int main(int argc , char *argv[])
     
     while ((clientSocket = accept(serverSocket, (struct sockaddr*)&client, &clientSize))) {
         printf("Client connected.\n");
-        if ((pid = fork())) printf("Child PID = %d", pid);
+        if ((pid = fork())) printf("Child PID = %d\n", pid);
         else {
             pid = getpid();
             dup2(clientSocket, STDOUT_FILENO);
@@ -62,7 +62,8 @@ int main(int argc , char *argv[])
                     // Finished receiving message
                     if (clientMessage[filled - 1] == '\0') break;
                 }
-                if (!readc) {printf("Client disconnected."); break;}
+                if (!readc)
+                    break;
                 system(clientMessage);
                 send(clientSocket, "> ", 3, SO_NOSIGPIPE);
             }
@@ -70,6 +71,7 @@ int main(int argc , char *argv[])
             exit(0);
         }
     }
+    
     fclose(stream);
     close(serverSocket);
     
