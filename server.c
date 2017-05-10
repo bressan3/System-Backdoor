@@ -6,6 +6,7 @@
 #include<sys/socket.h>
 #include<arpa/inet.h>
 #include <unistd.h>
+#include <signal.h>
 
 // Message Size
 #define BUFFER_SIZE 1024
@@ -36,7 +37,7 @@ int main(int argc , char *argv[])
     
     // Listen for new connections
     listen(serverSocket , 1);
-    printf("Waiting for incoming connections...\n");
+    printf("Listening on Port %d...Waiting for incoming connections...\n", PORT);
     
     FILE *stream = fdopen(dup(STDERR_FILENO), "w");
     setbuf(stream, NULL);
@@ -65,7 +66,7 @@ int main(int argc , char *argv[])
                 if (!readc)
                     break;
                 system(clientMessage);
-                send(clientSocket, "> ", 3, SO_NOSIGPIPE);
+                send(clientSocket, "> ", 3, (intptr_t)signal(SIGPIPE, SIG_IGN));
             }
             close(clientSocket);
             exit(0);
