@@ -16,6 +16,8 @@
 int main(int argc , char *argv[])
 {
     int serverSocket, clientSocket, pid;
+    char temp[256];
+    char path[256];
     struct sockaddr_in server, client;
     
     // Creates socket
@@ -47,6 +49,11 @@ int main(int argc , char *argv[])
     
     socklen_t clientSize = sizeof(client);
     
+    //Ensures that the start path is ~/
+    if(chdir(getenv("HOME")) == 0) {
+        getcwd(temp, sizeof(temp));
+    }
+    
     while ((clientSocket = accept(serverSocket, (struct sockaddr*)&client, &clientSize))) {
         printf("Client connected.\n");
         if ((pid = fork())) printf("Child PID = %d\n", pid);
@@ -65,7 +72,19 @@ int main(int argc , char *argv[])
                 }
                 if (!readc)
                     break;
-                system(clientMessage);
+                // Since cd is not a program, it won't execute by simply doing system(cd [path])
+                if ((clientMessage[0] == 'c' || clientMessage[0] == 'C') && (clientMessage[1] == 'd' || clientMessage[1] == 'D')) {
+                    strcpy(path, &clientMessage[3]);
+                    path[strlen(path) - 1] = '\0';
+                    if(chdir(path) == 0) {
+                        getcwd(temp, sizeof(temp));
+                    } else {
+                        printf("Path %s not found!\n", path);
+                    }
+                }
+                else {
+                    system(clientMessage);
+                }
                 send(clientSocket, "> ", 3, (intptr_t)signal(SIGPIPE, SIG_IGN));
             }
             close(clientSocket);
